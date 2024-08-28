@@ -1,0 +1,86 @@
+#playButton{
+    float:inline-start;
+    text-align: center;
+    background-color: red;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor:pointer;
+    border-color: black;
+    border-width: 1px;
+    border-style: solid;
+    transition:150ms cubic-bezier(.5,-0.07,.44,2.06) transform ;
+}
+#playButton:hover{
+    transform: scale(0.95);
+}
+#playButton:active{
+    transform: scale(0.9);
+}
+#PBContent{
+    margin: 0;
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.audioButton{
+    
+    text-align: center;
+    background-color: red;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor:pointer;
+    border-color: black;
+    border-width: 1px;
+    border-style: solid;
+    transition:150ms cubic-bezier(.5,-0.07,.44,2.06) transform,150ms rotate;
+}
+.audioButton>div{
+    margin: 0;
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+}
+.audioButton:hover{
+    transform: scale(0.95);
+}
+.audioButton:active{
+    transform: scale(0.9);
+}
+#backButton{
+    float:inline-start;
+}
+#BBContent{
+    font-size: 2em;
+    transition:150ms transform,150ms rotate;
+    line-height: 0px;
+    margin: 0px;
+    transform-origin: 52% center;
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+#backButton:active #BBContent{
+    transform: translate(-50%, -50%) rotate(-180deg);
+    
+}
+#audioControls{
+    max-width: 155px;
+}
+#forwardButton{
+    float:inline-end;
+}
+#FBContent{
+    font-size: 2em;
+    transition:150ms transform,150ms rotate;
+    line-height: 0px;
+    margin: 0px;
+    transform-origin: 48% center;
+    transform: translate(-50%, -50%) rotate(-45deg);
+}
+#forwardButton:active #FBContent{
+    transform: translate(-50%, -50%) rotate(180deg);
+    
+}
