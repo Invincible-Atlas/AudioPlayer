@@ -59,6 +59,47 @@ function dynamicUpdates(){
     tPlusText.innerHTML=`${timeElapsed}/${totalTime}`;
     
 }
+function readPlaylist(name){
+    let playlists;
+    if(localStorage.playlists){
+        playlists = JSON.parse(localStorage.playlists);
+        for(let i = 0;i<playlists.length;i++){
+            if(playlists[i].name==name){
+                // playlists[i].contents=data.contents;
+                exists = true;
+                
+            }
+        }
+    }else{
+        return(null);
+    }
+}
+/**
+ * 
+ * @param {JSON} data 
+ */
+function writePlaylist(data){
+    let playlists = "";
+    if(localStorage.playlists){
+        playlists = localStorage.playlists;
+        playlists=JSON.parse(playlists);
+        let exists = false;
+        for(let i = 0;i<playlists.length;i++){
+            if(playlists[i].name==data.name){
+                playlists[i].contents=data.contents;
+                exists = true;
+                
+            }
+        }
+        if(exists==false){
+            playlists.push(data)
+        }
+        localStorage.playlists = playlists;
+    }else{
+        localStorage.playlists = `[${JSON.stringify(data)}]`
+
+    }
+}
 // document.onload=(ev)=>{
 setInterval(dynamicUpdates,100);
 
