@@ -3,5 +3,10 @@
         "name":"36. Fractured Shrines",
         "path":"36. Fractured Shrines.mp3",
         "type":"audio/mp3"
+    },
+    {
+        "name":"03. GSO (Combat Two)",
+        "path":"03. GSO (Combat Two).mp3",
+        "type":"audio/mp3"
     }
 ]

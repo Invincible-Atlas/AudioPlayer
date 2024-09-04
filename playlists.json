@@ -1,0 +1,8 @@
+[
+    {
+        "name":"playlist1",
+        "contents":[
+            "song1.mp3","song2.wav"        
+        ]
+    }
+]
