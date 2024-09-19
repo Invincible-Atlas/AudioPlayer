@@ -67,10 +67,10 @@
     
 }
 #audioControls{
-    max-width: 155px;
+    max-width: 260px;
 }
 #forwardButton{
-    float:inline-end;
+    float:inline-start;
 }
 #FBContent{
     font-size: 2em;
@@ -83,4 +83,33 @@
 #forwardButton:active #FBContent{
     transform: translate(-50%, -50%) rotate(180deg);
     
+}
+#prevTrackButton{
+    float: inline-start;
+}
+#nextTrackButton{
+    float: inline-start;
+    
+}
+#NTBContent{
+    /* font-size: 2em; */
+    transition:150ms transform,150ms rotate;
+    line-height: 0px;
+    margin: 0px;
+    /* transform-origin: 48% center; */
+
+}
+#nextTrackButton:active #NTBContent{
+    transform: translateX(-10px);
+}
+#PTBContent{
+    /* font-size: 2em; */
+    transition:150ms transform,150ms rotate;
+    line-height: 0px;
+    margin: 0px;
+    /* transform-origin: center center; */
+
+}
+#prevTrackButton:active #PTBContent{
+    transform: translateX(-40px);
 }

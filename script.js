@@ -1,7 +1,21 @@
+
+
 let timeChangeValue = 0;
 let seekAllowed = true;
 let currentPlaylist = [];
 let currentSongIndex = 0;
+let changingSong = false;
+let prevSongIndex = 0;
+let isSliding = false;
+let sliderA = document.getElementById("seekSlider");
+sliderA.addEventListener('input', function () {
+  isSliding = true;
+//   output.innerHTML = isSliding;
+});
+sliderA.addEventListener('mouseup', function () {
+    isSliding = false;
+    // output.innerHTML = isSliding;
+});
 /**
  * 
  * @param {number} seconds 
@@ -15,6 +29,44 @@ function secondsToTime(seconds){
     }
     return(`${minutes}:${seconds2}`);
 }
+// async function pickDir(){
+//     let data;
+//     try {
+//         await window.showDirectoryPicker().then((data)=>{
+//             data=data;
+//         },()=>{
+//             alert("Error");
+
+//         });
+
+//     } catch (error) {
+//         alert(`Error: ${error}`);
+//         // throw(error);  
+//     };
+//     // alert(data.kind);
+//     return(data);
+// }
+
+// async function getFiles(directoryHandle) {
+//     let data = [];
+//     let audioJSON = [];
+//     for await (const handle of directoryHandle.values()) {
+//         if(handle.kind == "file"){
+//             data.push(handle);
+//             let fileData = await handle.getFile();
+//             alert(file.name);
+            
+//         }
+//     }
+    
+    
+// }
+// async function getDir(){
+    
+//     let directoryHandle = await pickDir();
+    
+//     await getFiles(directoryHandle);
+// }
 function playToggle(){
     const player = document.getElementById("mainPlayer");
     const playButton = document.getElementById("playButton");
@@ -124,8 +176,14 @@ async function getSongNames(data){
     })
     return(returnData);
 }
+function prevTrack(){
+    currentSongIndex--
+}
+function nextTrack(){
+    currentSongIndex++
+}
 async function dynamicUpdates(){
-    const player = document.getElementById("mainPlayer");
+    let player = document.getElementById("mainPlayer");
     const playButton = document.getElementById("playButton");
     const PBContent = document.getElementById("PBContent");
     const seekSlider = document.getElementById("seekSlider");
@@ -133,7 +191,7 @@ async function dynamicUpdates(){
     const tPlusText = document.getElementById("tPlusText");
     const playlistText = document.getElementById("playlistText");
     let newSliderValue=scale(player.currentTime,0,player.duration,1,1000);
-    if(Math.abs(newSliderValue-seekSlider.value)>2&&timeChangeValue==0&&seekAllowed==true){
+    if(isSliding==true&&timeChangeValue==0&&seekAllowed==true){
         player.currentTime=scale(seekSlider.value,1,1000,0,player.duration);
     }else{
         if(timeChangeValue!==0){
@@ -153,14 +211,55 @@ async function dynamicUpdates(){
         playButton.style.backgroundColor = "red";
         PBContent.innerHTML = "▶"
     }
-    playlistText.innerText= (await getSongNames(currentPlaylist)).join("\n");
+
+    let songNames = await getSongNames(currentPlaylist);
+    let containerEl = document.createElement("div");
+    for(i in songNames){
+        if(i==currentSongIndex){
+            let appendEl = document.createElement("p");
+            appendEl.innerHTML = songNames[i];
+            let boldEl = document.createElement("b");
+            boldEl.appendChild(appendEl);
+            containerEl.appendChild(boldEl);
+        }else{
+            let appendEl = document.createElement("p");
+            appendEl.innerHTML = songNames[i];
+            containerEl.appendChild(appendEl);
+        }
+    }
+    playlistText.innerHTML = "";
+    playlistText.appendChild(containerEl);
     // console.log(await getSongNames(currentPlaylist));
+    
     timeElapsed = secondsToTime(player.currentTime);
     totalTime = secondsToTime(player.duration);
     timeLeft = secondsToTime(player.duration-player.currentTime);
     
     tPlusText.innerHTML=`${timeElapsed}/${totalTime}`;
+    if(player.currentTime >= player.duration && isSliding == false){
+        currentSongIndex++
+    }
+    if(prevSongIndex !== currentSongIndex && changingSong == false){
+        seekAllowed = false;
+        changingSong = true;
+        
+        
+        // currentSongIndex++;
+        document.getElementById("source").src = "/audio/"+currentPlaylist[currentSongIndex];
+        // player = document.getElementById("mainPlayer");
+        
+        player.load();  
+        player.play()
+        player.currentTime = 0;
+        seekSlider.value = 1;
+        
+        // player.play();      
+        changingSong = false;
+        seekAllowed = true;
+        
     
+    }
+    prevSongIndex = currentSongIndex;
 }
 
 // getSongNames(["03. GSO (Combat Two).mp3"]);
@@ -168,7 +267,7 @@ async function dynamicUpdates(){
 writePlaylist({"name":"testPlaylist","contents":["36. Fractured Shrines.mp3","03. GSO (Combat Two).mp3"]});
 loadPlaylist("testPlaylist");
 // console.log(readPlaylist("testPlaylist").contents);
-console.log(localStorage.playlists);
-console.log(currentPlaylist);
+// console.log(localStorage.playlists);
+// console.log(currentPlaylist);
 setInterval(dynamicUpdates,100);
 
