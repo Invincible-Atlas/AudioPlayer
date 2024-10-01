@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Playlist</title>
+    <style>
+        /* div {
+          width: 350px;
+          height: 200px;
+          padding: 10px;
+          border: 1px solid #aaaaaa;
+        } */
+        
+        #container1{
+          width: 350px;
+          min-height: 200px;
+          border: 1px solid #000000;
+        }
+
+        #container2{
+          width: 350px;
+          min-height: 200px;
+          border: 1px solid #ff0000;
+        }
+        .addableSong{
+          cursor: pointer;
+        }
+        .addedSong{
+          cursor: grab;
+        }
+        .removeSong{
+          cursor: pointer;
+          font-weight: 500;
+        }
+        </style>
+        <!-- <script src="script.js"></script> -->
+
+</head>
+<body>
+  <div id="container1">
+    <!-- <div draggable="true" ondragover="dragOver(event)" ondragstart="dragStart(event)">Apples</div>
+    <div draggable="true" ondragover="dragOver(event)" ondragstart="dragStart(event)">Oranges</div>
+    <div draggable="true" ondragover="dragOver(event)" ondragstart="dragStart(event)">Bananas</div>
+    <div draggable="true" ondragover="dragOver(event)" ondragstart="dragStart(event)">Strawberries</div> -->
+  </div>
+  <br>
+  <div id="container2">
+
+  </div>
+  <input type="text" id="playlistNameInput" placeholder="Playlist Name">
+  <button id="createPlaylist" onclick="createPlaylist()">Create Playlist</button>
+  <script src="script.js"></script>
+  <script>
+    let _el;
+    let moving = false;
+    function dragOver(e) {
+      if (isBefore(_el, e.target))
+        e.target.parentNode.insertBefore(_el, e.target);
+      else
+        e.target.parentNode.insertBefore(_el, e.target.nextSibling);
+    }
+
+    function dragStart(e) {
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", null); // Thanks to bqlou for their comment.
+      _el = e.target;
+    }
+
+    function isBefore(el1, el2) {
+      if (el2.parentNode === el1.parentNode)
+        for (var cur = el1.previousSibling; cur && cur.nodeType !== 9; cur = cur.previousSibling)
+          if (cur === el2)
+            return true;
+      return false;
+    }
+  
+    let songContainer = document.getElementById("container2");
+    let playlistContainer = document.getElementById("container1");
+    function createPlaylist(){
+      let playlists = localStorage.playlists;
+      playlists=JSON.parse(playlists);
+      let contents = [];
+      for(const child of playlistContainer.children){
+        contents.push(child.getAttribute("data-path"));
+      }
+      // alert(document.getElementById("playlistNameInput"));
+      
+      let playlistName = document.getElementById("playlistNameInput").value;
+      // alert(playlistName1)
+      if(playlists.find((obj)=>{return(obj.name==playlistName)})){
+        alert("This playlist already exists");
+      }else if(playlistName=="new"){
+        alert(`You can't name a playlist "${playlistName}"`);
+      }else{
+        writePlaylist({"name":playlistName,"contents":contents});
+        window.location = window.location.protocol + "//" + window.location.hostname + `/playlists.html?playlist=${playlistName}`;
+
+      }
+      // alert(localStorage.playlists)
+
+    }
+    // // alert(songContainer);
+    // for(let i = 0;i<10;i++){
+    //   alert("1");
+    //   let appendEl = document.createElement("p");
+    //   alert(appendEl)
+    //   appendEl.innerHTML = "a";
+    //   alert("3")
+    //   songContainer.appendChild(appendEl);
+    //   alert("4")
+        
+        
+    // }
+    fetch("/audio/audio.json").then(res=>{if(!res.ok){console.error(`Fetch failed:${res.status}`)}return(res.json())}).then(JSONdata=>{
+      let songNames = [];
+      let songPaths = [];
+      // alert(JSONdata);
+      // alert(JSONdata.length)
+      for(let i = 0;i<JSONdata.length;i++){
+        // alert("JSONdata[i]")
+      // console.log(i)
+        // if(JSONdata.find((obj)=>{return(obj.path==JSONdata[i])})){
+        //     let index = JSONdata.findIndex((obj)=>{return(obj.path==JSONdata[i].path)});
+        //     alert(``);
+        //     songNames.push(JSONdata[index].name);
+        //     // console.log(`The path of ${data[i]} is ${JSONdata[index].path}`)
+        // }
+        songNames.push(JSONdata[i].name)
+        songPaths.push(JSONdata[i].path)
+      }
+      // alert(songNames)
+      for(i in songNames){
+        let appendEl = document.createElement("div");
+        appendEl.innerHTML = songNames[i];
+        appendEl.setAttribute("data-path",songPaths[i])
+        appendEl.addEventListener("click",(e)=>{
+          if(e.target.getAttribute("data-added")!=="true"&&moving==false){
+            e.target.setAttribute("data-added","true");
+            e.target.classList = "addedSong";
+            e.target.draggable = true;
+            e.target.addEventListener("dragover",dragOver);
+            e.target.addEventListener("dragstart",dragStart);
+            let removeEl = document.createElement("span");
+            removeEl.classList = "removeSong";
+            removeEl.innerHTML = "-";
+            removeEl.addEventListener("click",(e1)=>{
+              moving=true;
+              // alert(e1.target.parentNode.classList+","+e1.target.classList);
+              let parent = e1.target.parentNode;
+              
+              parent.classList = "addableSong";
+              parent.draggable = false;
+              parent.removeEventListener("dragover",dragOver);
+              parent.removeEventListener("dragstart",dragStart);
+              songContainer.appendChild(parent);
+              
+              e1.target.remove();
+              parent.setAttribute("data-added","false");
+              // moving=false;
+            })
+            appendEl.addEventListener("mouseup",(e)=>{
+              moving=false;
+            })
+            e.target.appendChild(removeEl)
+            
+            playlistContainer.appendChild(e.target);
+            e.target.addEventListener("click",()=>{t});
+            // alert(e.target)
+          }
+        })
+        appendEl.classList = "addableSong";
+
+
+        // appendEl.addEventListener("dragstart",(e)=>{
+        //   dragStart(e);
+        // })
+        
+        songContainer.appendChild(appendEl);
+      }
+      
+
+    
+
+
+    })
+  </script>
+</body>
+</html>

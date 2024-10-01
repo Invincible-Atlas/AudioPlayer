@@ -113,3 +113,9 @@
 #prevTrackButton:active #PTBContent{
     transform: translateX(-40px);
 }
+.songName{
+    cursor: pointer;
+}
+.playlistName{
+    cursor: pointer;
+}

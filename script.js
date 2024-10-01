@@ -5,9 +5,14 @@ let seekAllowed = true;
 let currentPlaylist = [];
 let currentSongIndex = 0;
 let changingSong = false;
-let prevSongIndex = 0;
+let prevSongIndex = -1;
 let isSliding = false;
+
 let sliderA = document.getElementById("seekSlider");
+function getSearchValue(search,value){
+    return(new URLSearchParams(search).get(value))
+}
+if(sliderA){
 sliderA.addEventListener('input', function () {
   isSliding = true;
 //   output.innerHTML = isSliding;
@@ -16,6 +21,7 @@ sliderA.addEventListener('mouseup', function () {
     isSliding = false;
     // output.innerHTML = isSliding;
 });
+}
 /**
  * 
  * @param {number} seconds 
@@ -156,7 +162,11 @@ function writePlaylist(data){
  * @param {string} name the playlist to load
  */
 function loadPlaylist(name){
-    currentPlaylist = readPlaylist(name).contents;
+    if(readPlaylist(name)!==null){
+        currentPlaylist = readPlaylist(name).contents;
+    }else{
+        currentPlaylist=[];
+    }
 }
 async function getSongNames(data){
     let returnData = [];
@@ -212,23 +222,7 @@ async function dynamicUpdates(){
         PBContent.innerHTML = "▶"
     }
 
-    let songNames = await getSongNames(currentPlaylist);
-    let containerEl = document.createElement("div");
-    for(i in songNames){
-        if(i==currentSongIndex){
-            let appendEl = document.createElement("p");
-            appendEl.innerHTML = songNames[i];
-            let boldEl = document.createElement("b");
-            boldEl.appendChild(appendEl);
-            containerEl.appendChild(boldEl);
-        }else{
-            let appendEl = document.createElement("p");
-            appendEl.innerHTML = songNames[i];
-            containerEl.appendChild(appendEl);
-        }
-    }
-    playlistText.innerHTML = "";
-    playlistText.appendChild(containerEl);
+    
     // console.log(await getSongNames(currentPlaylist));
     
     timeElapsed = secondsToTime(player.currentTime);
@@ -256,18 +250,99 @@ async function dynamicUpdates(){
         // player.play();      
         changingSong = false;
         seekAllowed = true;
-        
+    let songNames = await getSongNames(currentPlaylist);
+    let containerEl = document.createElement("div");
+    for(i in songNames){
+        if(i==currentSongIndex){
+            let appendEl = document.createElement("p");
+            appendEl.innerHTML = songNames[i];
+            appendEl.classList = "songName currentSong"
+            // eval(`appendEl.addEventListener('click',(e)=>{currentSongIndex = ${i}   })`);
+            let boldEl = document.createElement("b");
+            boldEl.appendChild(appendEl);
+            containerEl.appendChild(boldEl);
+        }else{
+            let appendEl = document.createElement("p");
+            appendEl.innerHTML = songNames[i];
+            appendEl.classList = "songName";
+            appendEl.setAttribute("data-songIndex",i);
+            appendEl.addEventListener('click',(e)=>{
+                currentSongIndex =  Number(e.target.getAttribute("data-songIndex"));
+            })
+            // eval(`appendEl.addEventListener('click',(e)=>{currentSongIndex = ${i}   })`);
+            containerEl.appendChild(appendEl);
+        }
+    }
+    playlistText.innerHTML = "";
+
+    playlistText.appendChild(containerEl);
     
     }
     prevSongIndex = currentSongIndex;
 }
+// alert(window.location.pathname)
+if(window.location.pathname=="/index.html"||window.location.pathname=="/"){
+    // getSongNames(["03. GSO (Combat Two).mp3"]);
+    // localStorage.removeItem("playlists");
+    writePlaylist({"name":"testPlaylist","contents":["36. Fractured Shrines.mp3","03. GSO (Combat Two).mp3"]});
+    if(window.location.search==""){
+        
+    }else{
+        loadPlaylist(getSearchValue(window.location.search,"playlist"));
+        currentSongIndex = Number(getSearchValue(window.location.search,"song"));
+    }
+    // console.log(readPlaylist("testPlaylist").contents);
+    // console.log(localStorage.playlists);
+    // console.log(currentPlaylist);
+    setInterval(dynamicUpdates,100);
+}else if(window.location.pathname=="/playlists.html"){
+    // alert(window.location.search);
+    if(window.location.search==""){
+        if(localStorage.playlists){
+            let playlists = localStorage.playlists;
+            playlists=JSON.parse(playlists);
+            let containerEl = document.createElement("div");
+            for(i in playlists){
+                let appendEl = document.createElement("p");
+                appendEl.innerHTML = playlists[i].name;
+                appendEl.classList = "playlistName";
+                appendEl.setAttribute("data-playlistName",playlists[i].name);
+                appendEl.addEventListener('click',(e)=>{
+                    window.location = window.location.protocol + "//" + window.location.hostname + `/playlists.html?playlist=${playlists[i].name}`;
+                })
+                // eval(`appendEl.addEventListener('click',(e)=>{currentSongIndex = ${i}   })`);
+                containerEl.appendChild(appendEl);
+            }
+            
+            document.body.appendChild(containerEl);
+            let newPlaylistLink = document.createElement("a");
+            newPlaylistLink.href="/newplaylist.html";
+            newPlaylistLink.innerHTML="New Playlist";
+            document.body.appendChild(newPlaylistLink);
+        }
+    }else if(getSearchValue(window.location.search,"playlist")=="new"){
+        
+    }else{
+        loadPlaylist(getSearchValue(window.location.search,"playlist"));
+        (async () => {
+            let songNames = await getSongNames(currentPlaylist);
+            let containerEl = document.createElement("div");
+            for(i in songNames){
 
-// getSongNames(["03. GSO (Combat Two).mp3"]);
-// localStorage.removeItem("playlists");
-writePlaylist({"name":"testPlaylist","contents":["36. Fractured Shrines.mp3","03. GSO (Combat Two).mp3"]});
-loadPlaylist("testPlaylist");
-// console.log(readPlaylist("testPlaylist").contents);
-// console.log(localStorage.playlists);
-// console.log(currentPlaylist);
-setInterval(dynamicUpdates,100);
+               
+                let appendEl = document.createElement("p");
+                appendEl.innerHTML = songNames[i];
+                appendEl.classList = "songName";
+                appendEl.setAttribute("data-songIndex",i);
+                appendEl.addEventListener('click',(e)=>{
+                    window.location = window.location.protocol + "//" + window.location.hostname + `?playlist=${getSearchValue(window.location.search,"playlist")}&song=${e.target.getAttribute("data-songIndex")}`;
+                })
+                // eval(`appendEl.addEventListener('click',(e)=>{currentSongIndex = ${i}   })`);
+                containerEl.appendChild(appendEl);
+                
+            }
+            document.body.append(containerEl);
+        })();
+    }
+}
 
